@@ -1,6 +1,6 @@
 # [L4D2] Tank & Witch on every map!
 
-**For work, you need [Left 4 DHooks Direct](https://forums.alliedmods.net/showthread.php?t=321696)**
+**For work you need [Left 4 DHooks Direct](https://forums.alliedmods.net/showthread.php?t=321696)**
 
 After the start of the campaign, the plugin randomly selects the spawn position of Tank and Witch.
 
