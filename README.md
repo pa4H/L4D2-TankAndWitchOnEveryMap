@@ -9,6 +9,6 @@ Additionally, the plugin displays a message about Tank encounter.
 
 ##
 
-Compiled on SourceMod 1.10
-
+Compiled on SourceMod 1.10  
+[Colors.inc](https://forums.alliedmods.net/showthread.php?t=96831) for plugin compilation.  
 [Developer](https://vk.com/pa4h1337)

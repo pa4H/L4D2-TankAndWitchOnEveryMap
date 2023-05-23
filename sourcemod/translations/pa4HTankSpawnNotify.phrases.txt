@@ -1,0 +1,14 @@
+"Phrases"
+{
+	"TankIsHereBOT"
+	{
+		"en"		"{olive}Tank{default} {green}has spawned!"
+		"ru"		"{green}Появился {olive}Танк"
+	}
+	"TankIsHere"
+	{
+		"#format"  	"{1:N}"
+		"en"		"{olive}Tank{default} {lightgreen}{1} {green}has spawned!"
+		"ru"		"{green}Появился {olive}Танк {lightgreen}{1}"
+	}
+}
