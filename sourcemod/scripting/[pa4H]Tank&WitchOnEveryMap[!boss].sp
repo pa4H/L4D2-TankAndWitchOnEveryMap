@@ -15,18 +15,18 @@ char restrictedMaps[][32] =  {  // Запрещенные карты
 	"c5m5_bridge", "c7m1_docks", "c7m3_port", "c6m3_port", "c4m5_milltown_escape"
 };
 
-public Plugin:myinfo = 
+public Plugin myinfo = 
 {
 	name = "Tank&Witch on every map and !boss", 
 	author = "pa4H", 
 	description = "", 
-	version = "1.0", 
+	version = "220224", 
 	url = "vk.com/pa4h1337"
 }
 
 public OnPluginStart()
 {
-	//RegConsoleCmd("sm_testTank", testTank, "");
+	//RegConsoleCmd("sm_test", testTank, "");
 	
 	RegConsoleCmd("sm_boss", getBossFlowsm, "");
 	RegConsoleCmd("sm_tank", getBossFlowsm, "");
@@ -44,19 +44,7 @@ public OnPluginStart()
 
 stock Action testTank(int client, int args) // DEBUG
 {
-	//PrintToChat(client, "%i HalfOfRound", GameRules_GetProp("m_bInSecondHalfOfRound"));
-	//PrintToChat(client, "%b isFinalMap", L4D_IsMissionFinalMap());
-	//PrintToChat(client, "%b isFirstMap", L4D_IsFirstMapInScenario());
-	//PrintToChat(client, "\x01Tank spawn: [\x04%.0f%%\x01]", rndFlowTank * 100);
-	PrintToChat(client, "curMaxFlow: %f ", map(L4D2_GetFurthestSurvivorFlow(), 0.0, L4D2Direct_GetMapMaxFlowDistance(), 0.0, 100.0));
-	
-	//PrintToChat(client, "\x04Default Server Tank:");
-	//PrintToChat(client, "custom: %f", GetTankFlow(0));
-	//PrintToChat(client, "custom: %f", GetWitchFlow(0));
-	//PrintToChat(client, "\x01Tank spawn: [\x04%.0f%%\x01]", L4D2Direct_GetVSTankFlowPercent(0) * 100); // Tank spawn: [49%]
-	//PrintToChat(client, "tankSpawn0? %b", L4D2Direct_GetVSTankToSpawnThisRound(0));
-	//PrintToChat(client, "tankSpawn1?  %b", L4D2Direct_GetVSTankToSpawnThisRound(1));
-	//setSpawn(true);
+
 	return Plugin_Handled;
 }
 
@@ -80,7 +68,6 @@ public Action AdjustBossFlow(Handle timer)
 		{
 			L4D2Direct_SetVSTankToSpawnThisRound(0, false); // Запрещаем спаун Танка
 			L4D2Direct_SetVSTankToSpawnThisRound(1, false);
-			//PrintToServer("restricted map!!! No tank");
 			break;
 		}
 	}
@@ -101,10 +88,10 @@ public Action AdjustBossFlow(Handle timer)
 
 public void randomSpawn(bool isRandom) // Функция задающая процент спауна Вички и Танка
 {
-	if (isRandom)
+	if (isRandom) // Получаем рандомный процент. Если 0.9, значит будет 80%. Если 0.2, значит будет 10%
 	{
-		rndFlowTank = GetRandomFloat(0.5, 0.9); // Получаем рандомный процент
-		rndFlowWitch = GetRandomFloat(0.3, 0.9);
+		rndFlowTank = GetRandomFloat(0.4, 1.0); // 30-90%
+		rndFlowWitch = GetRandomFloat(0.35, 0.9); // 25-80%
 	}
 	else
 	{
@@ -131,19 +118,35 @@ public Action getBossFlowsm(int client, int args) // Считываем проц
 		PrintToChat(client, "\x01Tank spawn: [\x04None\x01]"); // Tank spawn: [None]
 	}
 	
-	PrintToChat(client, "\x01Witch spawn [\x04%.0f%%\x01]", rndFlowWitch * 100); // Witch spawn: [49%]
+	PrintToChat(client, "\x01Witch spawn: [\x04%.0f%%\x01]", rndFlowWitch * 100); // Witch spawn: [49%]
 	return Plugin_Handled;
 }
 
 public void TankNotify(Event event, const char[] name, bool dontBroadcast) // Танк появился!
 {
-	//int client = GetClientOfUserId(event.GetInt("userid"));
+	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (!tankIsAlive)
 	{
 		tankIsAlive = true; // Шоб сообщение не выводилось дважды
 		PrecacheSound("ui/pickup_secret01.wav");
 		EmitSoundToAll("ui/pickup_secret01.wav");
-		CPrintToChatAll("%t", "TankIsHereBOT");
+		if (IsFakeClient(client)) {
+			CPrintToChatAll("%t", "TankIsHereBOT");
+		}
+		else {
+			for (int i = 1; i < MaxClients; i++)
+			{
+				if (IsValidClient(i))
+				{
+					if (i == client) {
+						CPrintToChat(i, "%t", "PassTankNotify");
+					}
+					else {
+						CPrintToChat(i, "%t", "TankIsHere", client);
+					}
+				}
+			}
+		}
 	}
 }
 public void TankDead(Event event, const char[] name, bool dontBroadcast)
@@ -152,8 +155,7 @@ public void TankDead(Event event, const char[] name, bool dontBroadcast)
 	if (victim != 0 && GetClientTeam(victim) == L4D_TEAM_INFECTED) // Infected is dead
 	{
 		int zClass = GetEntProp(victim, Prop_Send, "m_zombieClass"); // Smoker 1, Boomer 2, Hunter 3, Spitter 4, Jockey 5, Charger 6, Witch 7, Tank 8
-		if (zClass == 8) // Tank
-		{
+		if (zClass == 8) {  // Tank
 			tankIsAlive = false;
 		}
 	}
@@ -170,6 +172,14 @@ stock float GetWitchFlow(round)
 stock float map(float x, float in_min, float in_max, float out_min, float out_max) // Пропорция
 {
 	return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+stock bool IsValidClient(client)
+{
+	if (client > 0 && client <= MaxClients && IsClientConnected(client) && !IsFakeClient(client))
+	{
+		return true;
+	}
+	return false;
 }
 
 // Редактируем vscript карты
@@ -199,8 +209,4 @@ public Action L4D_OnGetScriptValueInt(const char[] key, int &retVal)
 		return Plugin_Handled;
 	}
 	return Plugin_Continue;
-}
-/*public VersusRoundStartEvent(Handle event, const char[] name, bool dontBroadcast) // Игрок вышел из saferoom
-{
-	
-}*/
+} 
