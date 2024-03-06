@@ -90,7 +90,7 @@ public void randomSpawn(bool isRandom) // Функция задающая про
 {
 	if (isRandom) // Получаем рандомный процент. Если 0.9, значит будет 80%. Если 0.2, значит будет 10%
 	{
-		rndFlowTank = GetRandomFloat(0.4, 1.0); // 30-90%
+		rndFlowTank = GetRandomFloat(0.5, 0.9); // 40-80%
 		rndFlowWitch = GetRandomFloat(0.35, 0.9); // 25-80%
 	}
 	else
